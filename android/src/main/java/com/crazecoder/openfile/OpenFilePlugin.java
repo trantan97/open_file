@@ -98,10 +98,10 @@ public class OpenFilePlugin implements MethodCallHandler
             }
             if (pathRequiresPermission()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    if(!isFileAvailable()){
+                    if (!isFileAvailable()) {
                         return;
                     }
-                    if (!isMediaStorePath()&&!Environment.isExternalStorageManager()) {
+                    if (!isMediaStorePath() && !Environment.isExternalStorageManager()) {
                         result(-3, "Permission denied: android.Manifest.permission.MANAGE_EXTERNAL_STORAGE");
                         return;
                     }
@@ -124,18 +124,18 @@ public class OpenFilePlugin implements MethodCallHandler
         }
     }
 
-    private boolean isMediaStorePath(){
+    private boolean isMediaStorePath() {
         boolean isMediaStorePath = false;
         String[] mediaStorePath = {"/DCIM/"
-                ,"/Pictures/"
-                ,"/Movies/"
-                ,"/Alarms/"
-                ,"/Audiobooks/"
-                ,"/Music/"
-                ,"/Notifications/"
-                ,"/Podcasts/"
-                ,"/Ringtones/"
-                ,"/Download/"};
+                , "/Pictures/"
+                , "/Movies/"
+                , "/Alarms/"
+                , "/Audiobooks/"
+                , "/Music/"
+                , "/Notifications/"
+                , "/Podcasts/"
+                , "/Ringtones/"
+                , "/Download/"};
         for (String s : mediaStorePath) {
             if (filePath.contains(s)) {
                 isMediaStorePath = true;
@@ -152,15 +152,16 @@ public class OpenFilePlugin implements MethodCallHandler
 
         try {
             String appDirCanonicalPath = new File(context.getApplicationInfo().dataDir).getCanonicalPath();
+            String externalFilePath = context.getExternalFilesDir(null).getCanonicalPath();
             String fileCanonicalPath = new File(filePath).getCanonicalPath();
-            return !fileCanonicalPath.startsWith(appDirCanonicalPath);
+            return !(fileCanonicalPath.startsWith(appDirCanonicalPath) || fileCanonicalPath.startsWith(externalFilePath));
         } catch (IOException e) {
             e.printStackTrace();
             return true;
         }
     }
 
-    private boolean isFileAvailable(){
+    private boolean isFileAvailable() {
         if (filePath == null) {
             result(-4, "the file path cannot be null");
             return false;
@@ -175,7 +176,7 @@ public class OpenFilePlugin implements MethodCallHandler
     }
 
     private void startActivity() {
-        if(!isFileAvailable()){
+        if (!isFileAvailable()) {
             return;
         }
         Intent intent = new Intent(Intent.ACTION_VIEW);
